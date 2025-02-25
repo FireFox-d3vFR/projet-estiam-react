@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { addFavorite, removeFavorite } from '../redux/actions';
+import { addFavorite, removeFavorite, addToCart } from '../redux/actions';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function CocktailDetailScreen({ route }) {
@@ -9,6 +9,7 @@ export default function CocktailDetailScreen({ route }) {
   const dispatch = useDispatch();
   const favorites = useSelector(state => state.favorites.favorites);
   const isFavorite = favorites.some(fav => fav.idDrink === cocktail.idDrink);
+  const [messageVisible, setMessageVisible] = useState(false);
 
   const handleFavoriteToggle = () => {
     if (isFavorite) {
@@ -18,22 +19,50 @@ export default function CocktailDetailScreen({ route }) {
     }
   };
 
+  const handleAddToCart = () => {
+    const ingredients = Object.keys(cocktail)
+      .filter(key => key.startsWith('strIngredient') && cocktail[key])
+      .map(key => ({
+        ingredient: cocktail[key],
+        quantity: 1,
+      }));
+    dispatch(addToCart(ingredients));
+    setMessageVisible(true);
+    setTimeout(() => {
+      setMessageVisible(false);
+    }, 3000);
+  };
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.card}>
         <Image source={{ uri: cocktail.strDrinkThumb }} style={styles.image} />
         <Text style={styles.title}>{cocktail.strDrink}</Text>
-        <TouchableOpacity onPress={handleFavoriteToggle} style={styles.favoriteButton}>
-          <Icon name={isFavorite ? 'heart' : 'heart-o'} size={30} color="red" />
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity onPress={handleFavoriteToggle} style={styles.favoriteButton}>
+            <Icon name={isFavorite ? 'heart' : 'heart-o'} size={30} color="red" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleAddToCart} style={styles.cartButton}>
+            <Icon name="shopping-cart" size={30} color="blue" />
+          </TouchableOpacity>
+        </View>
+        {messageVisible && (
+          <Text style={styles.message}>Articles ajoutés au panier !</Text>
+        )}
         <Text style={styles.instructions}>{cocktail.strInstructions}</Text>
         <Text style={styles.ingredientsTitle}>Ingrédients :</Text>
         {Object.keys(cocktail)
           .filter(key => key.startsWith('strIngredient') && cocktail[key])
           .map(key => (
-            <Text key={key} style={styles.ingredient}>
-              {cocktail[key]} - {cocktail[`strMeasure${key.slice(13)}`]}
-            </Text>
+            <View key={key} style={styles.ingredientContainer}>
+              <Image
+                source={{ uri: `https://www.thecocktaildb.com/images/ingredients/${cocktail[key]}-Medium.png` }}
+                style={styles.ingredientImage}
+              />
+              <Text style={styles.ingredientText}>
+                {cocktail[key]} - {cocktail[`strMeasure${key.slice(13)}`]}
+              </Text>
+            </View>
           ))}
       </View>
     </ScrollView>
@@ -75,7 +104,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333',
   },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
   favoriteButton: {
+    marginHorizontal: 10,
+  },
+  cartButton: {
+    marginHorizontal: 10,
+  },
+  message: {
+    fontSize: 16,
+    color: 'green',
     marginVertical: 10,
   },
   instructions: {
@@ -91,9 +134,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333',
   },
-  ingredient: {
+  ingredientContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 5,
+  },
+  ingredientImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 10,
+    marginRight: 10,
+  },
+  ingredientText: {
     fontSize: 16,
-    textAlign: 'center',
     color: '#666',
   },
 });

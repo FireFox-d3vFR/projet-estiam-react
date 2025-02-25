@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 import HomeScreen from "../screens/HomeScreen";
 import FavoritesScreen from "../screens/FavoritesScreen";
+import CartScreen from "../screens/CartScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -18,6 +19,8 @@ export default function BottomTabsNavigator() {
                         iconName = 'home';
                     } else if (route.name === 'Favorites') {
                         iconName = 'heart';
+                    } else if (route.name === 'Cart') {
+                        iconName = 'shopping-cart';
                     }
 
                     return <Icon name={iconName} size={size} color={color} />;
@@ -31,6 +34,7 @@ export default function BottomTabsNavigator() {
         >
             <Tab.Screen name="Home" component={HomeScreen} />
             <Tab.Screen name="Favorites" component={FavoritesScreen} />
+            <Tab.Screen name="Cart" component={CartScreen} />
         </Tab.Navigator>
     );
 }
