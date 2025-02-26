@@ -1,10 +1,12 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { Provider } from 'react-redux';
-import favoritesReducer from './reducers';
+import { configureStore } from "@reduxjs/toolkit";
+import { Provider } from "react-redux";
+import { favoriteReducer, cartReducer, shoppingListReducer } from "./reducers";
 
 const store = configureStore({
   reducer: {
-    favorites: favoritesReducer,
+    favorites: favoriteReducer,
+    cart: cartReducer,
+    shoppingList: shoppingListReducer,
   },
 });
 
