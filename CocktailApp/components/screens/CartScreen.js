@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, FlatList, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { getCart } from "../redux/selectors";
-import { removeFromCart } from "../redux/actions";
+import { removeFromCart, updateShoppingListItem } from "../redux/actions";
 import Icon from "react-native-vector-icons/FontAwesome";
 
 export default function CartScreen() {
@@ -11,6 +11,14 @@ export default function CartScreen() {
 
   const handleRemoveFromCart = (ingredient) => {
     dispatch(removeFromCart(ingredient));
+  };
+
+  const handleQuantityChange = (ingredient, quantity) => {
+    if (quantity > 0) {
+      dispatch(updateShoppingListItem(ingredient, quantity));
+    } else {
+      dispatch(removeFromCart(ingredient));
+    }
   };
 
   return (
@@ -30,7 +38,19 @@ export default function CartScreen() {
                 style={styles.image}
               />
               <Text style={styles.title}>{item.ingredient}</Text>
-              <Text style={styles.quantity}>{item.quantity}</Text>
+              <View style={styles.quantityContainer}>
+                <TouchableOpacity
+                  onPress={() => handleQuantityChange(item.ingredient, item.quantity - 1)}
+                >
+                  <Icon name="minus" size={20} color="red" />
+                </TouchableOpacity>
+                <Text style={styles.quantity}>{item.quantity}</Text>
+                <TouchableOpacity
+                  onPress={() => handleQuantityChange(item.ingredient, item.quantity + 1)}
+                >
+                  <Icon name="plus" size={20} color="green" />
+                </TouchableOpacity>
+              </View>
               <TouchableOpacity onPress={() => handleRemoveFromCart(item.ingredient)}>
                 <Icon name="trash" size={24} color="red" />
               </TouchableOpacity>
@@ -80,8 +100,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     flex: 1,
   },
+  quantityContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 10,
+  },
   quantity: {
     fontSize: 18,
-    marginRight: 10,
+    marginHorizontal: 10,
   },
 });
